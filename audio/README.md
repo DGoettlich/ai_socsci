@@ -1,21 +1,26 @@
-# (Olaf) Audio Demo: Musical Diffusion Analysis
+# (Olaf) Audio Demo: Embedding Space Visualization
 
-Event study examining whether UK bands copied US rock style after the British Invasion (1963).
+Simple visualization of songs in audio embedding space using MERT (Music Understanding Model).
 
-Uses CLAP audio embeddings to measure musical similarity, then tests for convergence post-event using standard event-study regression.
+Maps 10 songs including:
+
+- US innovators (Chuck Berry)
+- British Invasion bands (Beatles, Rolling Stones)
+- Modern pop (Billie Eilish, Tate McRae, The Weeknd)
+- 70s/80s (David Bowie, Nena, Pete Rodriguez)
+
+Uses t-SNE and UMAP to reduce high-dimensional MERT embeddings to 2D for visualization.
 
 ## Setup
 
-```bash
-uv sync --group clap
-```
-
-CLAP will auto-download pretrained weights on first run.
+Core dependencies are already installed. MERT will auto-download pretrained weights (~380MB) on first run from Hugging Face.
 
 ## Usage
 
-1. Add audio files (MP3/WAV) to `data/` folder
-2. Update `TRACKS` list in `musical_diffusion_demo.py` with your filenames
-3. Run: `uv run python audio/musical_diffusion_demo.py`
+The songs are already in `data/songs/` folder. Just run:
 
-Output: event-time coefficients plot showing UK vs US similarity around 1963.
+```bash
+uv run python audio/musical_diffusion_demo.py
+```
+
+Output: two PNG files in `figures/` folder showing songs in 2D embedding space (t-SNE and UMAP projections).

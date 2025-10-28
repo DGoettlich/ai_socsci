@@ -25,23 +25,24 @@ from transformers import Wav2Vec2FeatureExtractor, AutoModel
 
 # ----------- 1) Dataset ----------------------
 TRACKS = [
-    # US innovators
-    {"path": "data/songs/chuck_berry_roll_over_beethoven.mp3", "artist": "Chuck Berry", "title": "Roll Over Beethoven", "year": 1956, "category": "US innovator"},
+    # US innovators (1950s rock 'n' roll)
+    {"path": "data/songs/chuck_berry_roll_over_beethoven.mp3", "artist": "Chuck Berry", "title": "Roll Over Beethoven", "year": 1956, "category": "US Innovator"},
+    {"path": "data/songs/elvis_presley_hound_dog.mp3", "artist": "Elvis Presley", "title": "Hound Dog", "year": 1956, "category": "US Innovator"},
     
-    # British Invasion
+    # British Invasion (1960s-early 70s)
     {"path": "data/songs/beatles_roll_over_beethoven.mp3", "artist": "The Beatles", "title": "Roll Over Beethoven", "year": 1963, "category": "British Invasion"},
     {"path": "data/songs/beatles_yesterday.mp3", "artist": "The Beatles", "title": "Yesterday", "year": 1965, "category": "British Invasion"},
+    {"path": "data/songs/the_kinks_you_really_got_me.mp3", "artist": "The Kinks", "title": "You Really Got Me", "year": 1964, "category": "British Invasion"},
     {"path": "data/songs/rolling_stones_wild_horses.mp3", "artist": "The Rolling Stones", "title": "Wild Horses", "year": 1971, "category": "British Invasion"},
     
-    # Modern pop
+    # 80s Pop
+    {"path": "data/songs/madonna_like_a_virgin.mp3", "artist": "Madonna", "title": "Like a Virgin", "year": 1984, "category": "80s Pop"},
+    {"path": "data/songs/prince_purple_rain.mp3", "artist": "Prince", "title": "Purple Rain", "year": 1984, "category": "80s Pop"},
+    
+    # Modern pop (2010s-2020s)
     {"path": "data/songs/billie_eilish_bad_guy.mp3", "artist": "Billie Eilish", "title": "bad guy", "year": 2019, "category": "Modern"},
     {"path": "data/songs/tate_mcrae_sports_car.mp3", "artist": "Tate McRae", "title": "Sports car", "year": 2024, "category": "Modern"},
     {"path": "data/songs/the_weeknd_blinding_lights.mp3", "artist": "The Weeknd", "title": "Blinding Lights", "year": 2019, "category": "Modern"},
-    
-    # Other eras
-    {"path": "data/songs/david_bowie_life_on_mars.mp3", "artist": "David Bowie", "title": "Life On Mars", "year": 1971, "category": "70s/80s"},
-    {"path": "data/songs/nena_99_luftballons.mp3", "artist": "Nena", "title": "99 Luftballons", "year": 1983, "category": "70s/80s"},
-    {"path": "data/songs/pete_rodriguez_i_like_it_like_that.mp3", "artist": "Pete Rodriguez", "title": "I Like It Like That", "year": 1967, "category": "70s/80s"},
 ]
 
 # ----------- 2) Audio embeddings with MERT ----------
@@ -61,7 +62,7 @@ def load_audio_mono(path, sr=24000, max_seconds=30):
 
 # Initialize MERT model once (downloads ~380MB on first run, cached afterwards)
 print("Loading MERT model...")
-device = "cuda" if torch.cuda.is_available() else ("mps" if torch.backends.mps.is_available() else "cpu")
+device = "cuda" if torch.cuda.is_available() else "cpu"
 mert_model = AutoModel.from_pretrained("m-a-p/MERT-v1-95M", trust_remote_code=True)
 mert_processor = Wav2Vec2FeatureExtractor.from_pretrained("m-a-p/MERT-v1-95M", trust_remote_code=True)
 mert_model.eval().requires_grad_(False)
@@ -145,8 +146,8 @@ def plot_embeddings(df, x_col, y_col, title, xlabel, ylabel, filename):
     plt.style.use('seaborn-v0_8-darkgrid')
     
     categories = df["category"].unique()
-    colors = {"US innovator": "#C41E3A", "British Invasion": "#00539B", "Modern": "#6A1B9A", "70s/80s": "#FF8C00"}
-    markers = {"US innovator": "o", "British Invasion": "s", "Modern": "^", "70s/80s": "D"}
+    colors = {"US Innovator": "#C41E3A", "British Invasion": "#00539B", "80s Pop": "#FF8C00", "Modern": "#6A1B9A"}
+    markers = {"US Innovator": "o", "British Invasion": "s", "80s Pop": "D", "Modern": "^"}
     
     for cat in categories:
         mask = df["category"] == cat

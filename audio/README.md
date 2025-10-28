@@ -2,12 +2,12 @@
 
 Simple visualization of songs in audio embedding space using MERT (Music Understanding Model).
 
-Maps 10 songs including:
+Maps 11 songs including:
 
-- US innovators (Chuck Berry)
-- British Invasion bands (Beatles, Rolling Stones)
+- US Innovators (Chuck Berry, Elvis Presley)
+- British Invasion bands (The Beatles, The Kinks, Rolling Stones)
+- 80s Pop (Madonna, Prince)
 - Modern pop (Billie Eilish, Tate McRae, The Weeknd)
-- 70s/80s (David Bowie, Nena, Pete Rodriguez)
 
 Uses t-SNE and UMAP to reduce high-dimensional MERT embeddings to 2D for visualization.
 

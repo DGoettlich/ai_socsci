@@ -160,7 +160,7 @@ def plot_embeddings(df, x_col, y_col, title, xlabel, ylabel, filename):
     for _, row in df.iterrows():
         plt.annotate(f"{row['artist']} - {row['title']}", 
                     (row[x_col], row[y_col]),
-                    fontsize=9, alpha=0.85, 
+                    fontsize=14, alpha=0.85, 
                     bbox=dict(boxstyle='round,pad=0.3', facecolor='white', alpha=0.7, edgecolor='none'),
                     ha='center', va='bottom')
     

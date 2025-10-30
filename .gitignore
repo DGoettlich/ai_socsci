@@ -12,3 +12,4 @@ wheels/
 .coverage
 docs/coverage/
 .conda
+.DS_Store

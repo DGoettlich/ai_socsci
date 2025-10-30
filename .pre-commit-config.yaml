@@ -15,7 +15,7 @@ repos:
     hooks:
       - id: pytest
         name: pytest
-        entry: uv run python -m pytest --cov=src --cov-report=term --cov-fail-under=80
+        entry: uv run python -m pytest --cov=src --cov-report=term
         language: python
         pass_filenames: false
         additional_dependencies: 

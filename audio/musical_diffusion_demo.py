@@ -11,6 +11,7 @@ Uses t-SNE and UMAP to reduce high-dimensional MERT embeddings to 2D for visuali
 
 import os
 import warnings
+
 warnings.filterwarnings("ignore")
 
 import numpy as np
@@ -26,24 +27,88 @@ from transformers import Wav2Vec2FeatureExtractor, AutoModel
 # ----------- 1) Dataset ----------------------
 TRACKS = [
     # US innovators (1950s rock 'n' roll)
-    {"path": "data/songs/chuck_berry_roll_over_beethoven.mp3", "artist": "Chuck Berry", "title": "Roll Over Beethoven", "year": 1956, "category": "US Innovator"},
-    {"path": "data/songs/elvis_presley_hound_dog.mp3", "artist": "Elvis Presley", "title": "Hound Dog", "year": 1956, "category": "US Innovator"},
-    
+    {
+        "path": "data/songs/chuck_berry_roll_over_beethoven.mp3",
+        "artist": "Chuck Berry",
+        "title": "Roll Over Beethoven",
+        "year": 1956,
+        "category": "US Innovator",
+    },
+    {
+        "path": "data/songs/elvis_presley_hound_dog.mp3",
+        "artist": "Elvis Presley",
+        "title": "Hound Dog",
+        "year": 1956,
+        "category": "US Innovator",
+    },
     # British Invasion (1960s-early 70s)
-    {"path": "data/songs/beatles_roll_over_beethoven.mp3", "artist": "The Beatles", "title": "Roll Over Beethoven", "year": 1963, "category": "British Invasion"},
-    {"path": "data/songs/beatles_yesterday.mp3", "artist": "The Beatles", "title": "Yesterday", "year": 1965, "category": "British Invasion"},
-    {"path": "data/songs/the_kinks_you_really_got_me.mp3", "artist": "The Kinks", "title": "You Really Got Me", "year": 1964, "category": "British Invasion"},
-    {"path": "data/songs/rolling_stones_wild_horses.mp3", "artist": "The Rolling Stones", "title": "Wild Horses", "year": 1971, "category": "British Invasion"},
-    
+    {
+        "path": "data/songs/beatles_roll_over_beethoven.mp3",
+        "artist": "The Beatles",
+        "title": "Roll Over Beethoven",
+        "year": 1963,
+        "category": "British Invasion",
+    },
+    {
+        "path": "data/songs/beatles_yesterday.mp3",
+        "artist": "The Beatles",
+        "title": "Yesterday",
+        "year": 1965,
+        "category": "British Invasion",
+    },
+    {
+        "path": "data/songs/the_kinks_you_really_got_me.mp3",
+        "artist": "The Kinks",
+        "title": "You Really Got Me",
+        "year": 1964,
+        "category": "British Invasion",
+    },
+    {
+        "path": "data/songs/rolling_stones_wild_horses.mp3",
+        "artist": "The Rolling Stones",
+        "title": "Wild Horses",
+        "year": 1971,
+        "category": "British Invasion",
+    },
     # 80s Pop
-    {"path": "data/songs/madonna_like_a_virgin.mp3", "artist": "Madonna", "title": "Like a Virgin", "year": 1984, "category": "80s Pop"},
-    {"path": "data/songs/prince_purple_rain.mp3", "artist": "Prince", "title": "Purple Rain", "year": 1984, "category": "80s Pop"},
-    
+    {
+        "path": "data/songs/madonna_like_a_virgin.mp3",
+        "artist": "Madonna",
+        "title": "Like a Virgin",
+        "year": 1984,
+        "category": "80s Pop",
+    },
+    {
+        "path": "data/songs/prince_purple_rain.mp3",
+        "artist": "Prince",
+        "title": "Purple Rain",
+        "year": 1984,
+        "category": "80s Pop",
+    },
     # Modern pop (2010s-2020s)
-    {"path": "data/songs/billie_eilish_bad_guy.mp3", "artist": "Billie Eilish", "title": "bad guy", "year": 2019, "category": "Modern"},
-    {"path": "data/songs/tate_mcrae_sports_car.mp3", "artist": "Tate McRae", "title": "Sports car", "year": 2024, "category": "Modern"},
-    {"path": "data/songs/the_weeknd_blinding_lights.mp3", "artist": "The Weeknd", "title": "Blinding Lights", "year": 2019, "category": "Modern"},
+    {
+        "path": "data/songs/billie_eilish_bad_guy.mp3",
+        "artist": "Billie Eilish",
+        "title": "bad guy",
+        "year": 2019,
+        "category": "Modern",
+    },
+    {
+        "path": "data/songs/tate_mcrae_sports_car.mp3",
+        "artist": "Tate McRae",
+        "title": "Sports car",
+        "year": 2024,
+        "category": "Modern",
+    },
+    {
+        "path": "data/songs/the_weeknd_blinding_lights.mp3",
+        "artist": "The Weeknd",
+        "title": "Blinding Lights",
+        "year": 2019,
+        "category": "Modern",
+    },
 ]
+
 
 # ----------- 2) Audio embeddings with MERT ----------
 def load_audio_mono(path, sr=24000, max_seconds=30):
@@ -60,32 +125,41 @@ def load_audio_mono(path, sr=24000, max_seconds=30):
             y = np.pad(y, (0, target_len - len(y)))
     return y, sr
 
+
 # Initialize MERT model once (downloads ~380MB on first run, cached afterwards)
 print("Loading MERT model...")
 device = "cuda" if torch.cuda.is_available() else "cpu"
 mert_model = AutoModel.from_pretrained("m-a-p/MERT-v1-95M", trust_remote_code=True)
-mert_processor = Wav2Vec2FeatureExtractor.from_pretrained("m-a-p/MERT-v1-95M", trust_remote_code=True)
+mert_processor = Wav2Vec2FeatureExtractor.from_pretrained(
+    "m-a-p/MERT-v1-95M", trust_remote_code=True
+)
 mert_model.eval().requires_grad_(False)
 mert_model.to(device)
 print("MERT model loaded successfully!")
 
+
 def get_embedding(path):
     """Get audio embedding using MERT."""
     y, sr = load_audio_mono(path, sr=24000, max_seconds=30)
-    
+
     # Process audio
     inputs = mert_processor(y, sampling_rate=sr, return_tensors="pt")
     inputs = {k: v.to(device) for k, v in inputs.items()}
-    
+
     # Get embeddings from all layers and average
     with torch.no_grad():
         outputs = mert_model(**inputs, output_hidden_states=True)
-    
+
     # Average across all layers and time dimension
-    all_hidden_states = torch.stack(outputs.hidden_states).squeeze()  # [layers, time, dim]
-    emb = all_hidden_states.mean(dim=0).mean(dim=0).cpu().numpy()  # average across layers and time
-    
+    all_hidden_states = torch.stack(
+        outputs.hidden_states
+    ).squeeze()  # [layers, time, dim]
+    emb = (
+        all_hidden_states.mean(dim=0).mean(dim=0).cpu().numpy()
+    )  # average across layers and time
+
     return emb
+
 
 # ----------- 3) Process all the tracks -------------------
 rows = []
@@ -100,12 +174,15 @@ for t in TRACKS:
 df = pd.DataFrame(rows)
 
 # Remove rows without valid embeddings
-df = df[df["embedding"].apply(lambda v: isinstance(v, np.ndarray) and np.isfinite(v).all())].copy()
+df = df[
+    df["embedding"].apply(lambda v: isinstance(v, np.ndarray) and np.isfinite(v).all())
+].copy()
 if df.empty:
     raise SystemExit("No valid audio files found. Need to add real MP3 files!")
 
 # ----------- 4) Dimensionality reduction -------------------
 embeddings = np.vstack(df["embedding"].to_list())
+
 
 # Normalize embeddings for better similarity computation
 def l2norm(v):
@@ -114,6 +191,7 @@ def l2norm(v):
     n = np.linalg.norm(v)
     return v / n if n > 0 else v
 
+
 embeddings_normalized = np.array([l2norm(emb) for emb in embeddings])
 
 # PCA
@@ -121,7 +199,7 @@ pca = PCA(n_components=2)
 embeddings_pca = pca.fit_transform(embeddings_normalized)
 
 # t-SNE
-tsne = TSNE(n_components=2, random_state=42, perplexity=min(5, len(df)-1))
+tsne = TSNE(n_components=2, random_state=42, perplexity=min(5, len(df) - 1))
 embeddings_tsne = tsne.fit_transform(embeddings_normalized)
 
 # UMAP
@@ -140,50 +218,85 @@ df["umap2"] = embeddings_umap[:, 1]
 # Create figures directory
 os.makedirs("figures", exist_ok=True)
 
+
 def plot_embeddings(df, x_col, y_col, title, xlabel, ylabel, filename):
     """Helper function to plot embeddings and save to file."""
     plt.figure(figsize=(12, 9))
-    plt.style.use('seaborn-v0_8-darkgrid')
-    
+    plt.style.use("seaborn-v0_8-darkgrid")
+
     categories = df["category"].unique()
-    colors = {"US Innovator": "#C41E3A", "British Invasion": "#00539B", "80s Pop": "#FF8C00", "Modern": "#6A1B9A"}
-    markers = {"US Innovator": "o", "British Invasion": "s", "80s Pop": "D", "Modern": "^"}
-    
+    colors = {
+        "US Innovator": "#C41E3A",
+        "British Invasion": "#00539B",
+        "80s Pop": "#FF8C00",
+        "Modern": "#6A1B9A",
+    }
+    markers = {
+        "US Innovator": "o",
+        "British Invasion": "s",
+        "80s Pop": "D",
+        "Modern": "^",
+    }
+
     for cat in categories:
         mask = df["category"] == cat
-        plt.scatter(df[mask][x_col], df[mask][y_col], 
-                    c=colors.get(cat, "black"), 
-                    marker=markers.get(cat, "o"),
-                    s=150, alpha=0.8, edgecolors='white', linewidths=1.5, label=cat)
-    
+        plt.scatter(
+            df[mask][x_col],
+            df[mask][y_col],
+            c=colors.get(cat, "black"),
+            marker=markers.get(cat, "o"),
+            s=150,
+            alpha=0.8,
+            edgecolors="white",
+            linewidths=1.5,
+            label=cat,
+        )
+
     # Add labels with better positioning
     for _, row in df.iterrows():
-        plt.annotate(f"{row['artist']} - {row['title']}", 
-                    (row[x_col], row[y_col]),
-                    fontsize=14, alpha=0.85, 
-                    bbox=dict(boxstyle='round,pad=0.3', facecolor='white', alpha=0.7, edgecolor='none'),
-                    ha='center', va='bottom')
-    
-    plt.xlabel(xlabel, fontsize=12, fontweight='bold')
-    plt.ylabel(ylabel, fontsize=12, fontweight='bold')
-    plt.title(title, fontsize=14, fontweight='bold', pad=15)
-    plt.legend(fontsize=10, framealpha=0.9, loc='best')
-    plt.grid(True, alpha=0.2, linestyle='--')
+        plt.annotate(
+            f"{row['artist']} - {row['title']}",
+            (row[x_col], row[y_col]),
+            fontsize=14,
+            alpha=0.85,
+            bbox=dict(
+                boxstyle="round,pad=0.3", facecolor="white", alpha=0.7, edgecolor="none"
+            ),
+            ha="center",
+            va="bottom",
+        )
+
+    plt.xlabel(xlabel, fontsize=12, fontweight="bold")
+    plt.ylabel(ylabel, fontsize=12, fontweight="bold")
+    plt.title(title, fontsize=14, fontweight="bold", pad=15)
+    plt.legend(fontsize=10, framealpha=0.9, loc="best")
+    plt.grid(True, alpha=0.2, linestyle="--")
     plt.tight_layout()
-    plt.savefig(f"figures/{filename}", dpi=300, bbox_inches='tight', facecolor='white')
+    plt.savefig(f"figures/{filename}", dpi=300, bbox_inches="tight", facecolor="white")
     plt.close()
     print(f"Saved: figures/{filename}")
 
-# Plot t-SNE and UMAP
-plot_embeddings(df, "tsne1", "tsne2",
-                "Songs in MERT Embedding Space (t-SNE to 2D)",
-                "t-SNE dimension 1", "t-SNE dimension 2",
-                "songs_tsne.png")
 
-plot_embeddings(df, "umap1", "umap2",
-                "Songs in MERT Embedding Space (UMAP to 2D)",
-                "UMAP dimension 1", "UMAP dimension 2",
-                "songs_umap.png")
+# Plot t-SNE and UMAP
+plot_embeddings(
+    df,
+    "tsne1",
+    "tsne2",
+    "Songs in MERT Embedding Space (t-SNE to 2D)",
+    "t-SNE dimension 1",
+    "t-SNE dimension 2",
+    "songs_tsne.png",
+)
+
+plot_embeddings(
+    df,
+    "umap1",
+    "umap2",
+    "Songs in MERT Embedding Space (UMAP to 2D)",
+    "UMAP dimension 1",
+    "UMAP dimension 2",
+    "songs_umap.png",
+)
 
 # ----------- 6) Summary -------------------
 print("\n=== Summary ===")
@@ -199,11 +312,11 @@ from sklearn.metrics.pairwise import cosine_similarity
 sim_matrix = cosine_similarity(embeddings_normalized)
 
 # Find the two "Roll Over Beethoven" songs
-chuck_idx = df[df['title'] == 'Roll Over Beethoven'].index[0]
-beatles_idx = df[df['title'] == 'Roll Over Beethoven'].index[1]
+chuck_idx = df[df["title"] == "Roll Over Beethoven"].index[0]
+beatles_idx = df[df["title"] == "Roll Over Beethoven"].index[1]
 
-chuck_artist = df.loc[chuck_idx, 'artist']
-beatles_artist = df.loc[beatles_idx, 'artist']
+chuck_artist = df.loc[chuck_idx, "artist"]
+beatles_artist = df.loc[beatles_idx, "artist"]
 
 similarity = sim_matrix[chuck_idx, beatles_idx]
 print(f"\n{chuck_artist} vs {beatles_artist} (Roll Over Beethoven): {similarity:.3f}")
@@ -211,7 +324,9 @@ print(f"\n{chuck_artist} vs {beatles_artist} (Roll Over Beethoven): {similarity:
 # Find most similar songs
 print("\nMost similar pairs:")
 for i in range(len(df)):
-    for j in range(i+1, len(df)):
+    for j in range(i + 1, len(df)):
         sim = sim_matrix[i, j]
-        print(f"{df.iloc[i]['artist']} - {df.iloc[i]['title']} vs {df.iloc[j]['artist']} - {df.iloc[j]['title']}: {sim:.3f}")
+        print(
+            f"{df.iloc[i]['artist']} - {df.iloc[i]['title']} vs {df.iloc[j]['artist']} - {df.iloc[j]['title']}: {sim:.3f}"
+        )
 print("\n")

@@ -13,3 +13,4 @@ wheels/
 docs/coverage/
 .conda
 .DS_Store
+data/**/*.pdf

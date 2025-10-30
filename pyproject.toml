@@ -1,14 +1,18 @@
 [project]
-name = "repo-template"
+name = "ai_socsci"
 version = "0.1.0"
-description = "Add your description here"
+description = "repo with examples for a seminar on AI for the social sciences"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "dotenv>=0.9.9",
+    "instructor>=1.12.0",
     "librosa>=0.10.0",
     "matplotlib>=3.7.0",
     "numpy>=1.24.0",
     "pandas>=2.0.0",
+    "pdf2image>=1.17.0",
+    "pymupdf>=1.26.5",
     "scikit-learn>=1.3.0",
     "statsmodels>=0.14.0",
     "tensorflow>=2.20.0",

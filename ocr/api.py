@@ -33,6 +33,11 @@ client = OpenAI()
 for page in pages:
     base64_image = encode_image(page)
 
+    print(base64_image[:500])  # Print the first 30 characters of the base64 string for verification
+
+    import sys
+    sys.exit()
+
     response = client.responses.create(
         model="gpt-5-nano",
         input=[

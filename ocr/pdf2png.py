@@ -13,3 +13,7 @@ for i, page in tqdm(enumerate(doc), desc="converting", total=len(doc)):
     pix.save(outdir / f"page_{i + 1:03d}.png")
 
 doc.close()
+
+
+
+
